@@ -1,6 +1,9 @@
 <?php
 
-require "php-export-data.class.php";
+// Shows how exporting to string works. 
+// This isn't a good way to export very large datasets, since all the exported data must be kept in memory 
+
+require "../php-export-data.class.php";
 
 $tsv = new ExportDataTSV('string');
 $tsv->filename = "test.xls";
@@ -16,4 +19,6 @@ foreach($data as $row) {
 }
 $tsv->finalize();
 
-print $tsv->getString();
+$exportedData =  $tsv->getString();
+
+print $exportedData;

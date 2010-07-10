@@ -1,6 +1,6 @@
 <?php
 
-require "php-export-data.class.php";
+require "../php-export-data.class.php";
 
 $excel = new ExportDataExcel('browser');
 $excel->filename = "test.xls";

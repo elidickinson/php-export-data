@@ -4,7 +4,7 @@
 // computer it takes 43 seconds to write out 83MB of data, but 
 // only uses 750kb of memory.
 
-require "php-export-data.class.php";
+require "../php-export-data.class.php";
 
 function genRandomString($length = 100) {
     $characters = "0123456789abcdefghijklmnopqrstuvwxyz _";

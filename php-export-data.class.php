@@ -136,12 +136,15 @@ class ExportDataCSV extends ExportData {
 
 
 /**
- * ExportDataExcel exports data into an XML format that can be read by MS Excel and
- * and OpenOffice. Creates a workbook with a single worksheet (title specified by
+ * ExportDataExcel exports data into an XML format  (spreadsheetML) that can be 
+ * read by MS Excel 2003 and newer as well as OpenOffice
+ * 
+ * Creates a workbook with a single worksheet (title specified by
  * $title).
  * 
- * Note that using .XLS as a file extension will cause Excel 2007 to warn that
- * the file extension doesn't match the file type, but it will read the file
+ * Note that using .XML is the "correct" file extension for these files, but it
+ * generally isn't associated with Excel. Using .XLS is tempting, but Excel 2007 will
+ * throw a scary warning that the extension doesn't match the file type.
  * 
  * Based on Excel XML code from Excel_XML (http://github.com/oliverschwarz/php-excel)
  *  by Oliver Schwarz
@@ -154,7 +157,7 @@ class ExportDataExcel extends ExportData {
 	public $encoding = 'UTF-8'; // encoding type to specify in file. 
 	// Note that you're on your own for making sure your data is actually encoded to this encoding
 	
-	public $title = 'Untitled'; // title for Worksheet 
+	public $title = 'Sheet1'; // title for Worksheet 
 	
 	function generateHeader() {
 		

@@ -3,7 +3,7 @@
 require "../php-export-data.class.php";
 
 $excel = new ExportDataExcel('browser');
-$excel->filename = "test.xls";
+$excel->filename = "test.xml";
 
 $data = array(
 	array(1,2,3),

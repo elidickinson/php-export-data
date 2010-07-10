@@ -11,18 +11,15 @@ function genRandomString($length = 100) {
     return $string;
 }
 
-$excel = new ExportDataExcel(array('useTempFile' => TRUE));
+$excel = new ExportDataExcel('file');
 $excel->filename = "test_big_excel.xls";
 
-
-for($i = 1; $i<10000; $i++) {
+$excel->initialize();
+for($i = 1; $i<100000; $i++) {
 	$row = array($i, genRandomString(), genRandomString(), genRandomString(), genRandomString(), genRandomString());
 	$excel->addRow($row);
 }
+$excel->finalize();
 
-
-// print $excel->exportToString();
-// $excel->exportToBrowser();
-$excel->exportToFile();
 
 print number_format(memory_get_peak_usage());

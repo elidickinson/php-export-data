@@ -1,74 +1,82 @@
 <?php
 
-
 abstract class ExportData {
-	protected $config = array('useTempFile' => FALSE);
-	protected $rows = array();
-	protected $tempFile;
-	protected $tempFilename;
-	public $filename;
+	// protected $config = array('useTempFile' => FALSE);
+	protected $exportTo; // Set in constructor to one of 'browser', 'file', 'string'
+	protected $stringData; // stringData so far, used if export string mode
+	protected $tempFile; // handle to temp file (for export file mode)
+	protected $tempFilename; // temp file name and path (for export file mode)
 
-	public function __construct($config = array()) {
-		$this->config = array_merge($this->config, $config);
+	public $filename; // file mode: the output file name; browser mode: file name for download; string mode: not used
+
+	public function __construct($exportTo = "browser", $filename = "export") {
+		// $this->config = array_merge($this->config, $config);
 		
-		if($this->config['useTempFile']) {
-			$this->tempFilename = tempnam(sys_get_temp_dir(), 'exportdata');
-			$this->tempFile = fopen($this->tempFilename, "w");
-			fwrite($this->tempFile, $this->generateHeader());
+		if(!in_array($exportTo, array('browser','file','string') )) {
+			throw new Exception("$exportTo is not a valid ExportData export type");
 		}
-		
+		$this->exportTo = $exportTo;
+		$this->filename = $filename;
 	}
 	
-	public function getConfig() {
-		return $this->config;
+	public function initialize() {
+		
+		switch($this->exportTo) {
+			case 'browser':
+				$this->sendHttpHeaders();
+				break;
+			case 'string':
+				$this->stringData = '';
+				break;
+			case 'file':
+				$this->tempFilename = tempnam(sys_get_temp_dir(), 'exportdata');
+				$this->tempFile = fopen($this->tempFilename, "w");
+				break;
+		}
+		
+		$this->write($this->generateHeader());
 	}
 	
 	public function addRow($row) {
+		$this->write($this->generateRow($row));
+	}
+	
+	public function finalize() {
 		
-		if($this->config['useTempFile']) {
-			// write data to file
-			fwrite($this->tempFile, $this->generateRow($row));
-		}
-		else {
-			// store data in rows array
-			$this->rows[] = $row;
+		$this->write($this->generateFooter());
+		
+		switch($this->exportTo) {
+			case 'browser':
+				flush();
+				exit(); // not sure about this...
+				break;
+			case 'string':
+				// do nothing
+				break;
+			case 'file':
+				fclose($this->tempFile);
+				rename($this->tempFilename, $this->filename);
+				break;
 		}
 	}
 	
-	public function exportToString() {
-		$output = '';
-		$output .= $this->generateHeader();
-		foreach($this->rows as $row) {
-			$output .= $this->generateRow($row);
-		}
-		$output .= $this->generateFooter();
-		return $output;
+	public function getString() {
+		return $this->stringData;
 	}
-	
 	
 	abstract public function sendHttpHeaders();
 	
-	public function exportToBrowser() {
-		$this->sendHttpHeaders();
-		echo $this->exportToString();
-		exit();
-	}
-	
-	public function exportToFile() {
-		if($this->config['useTempFile']) {
-			fwrite($this->tempFile, $this->generateFooter());
-			fclose($this->tempFile);
-			rename($this->tempFilename, $this->filename);
-		}
-		else {
-			$f = fopen($this->filename,"w");
-			fwrite($f, $this->generateHeader());
-			foreach($this->rows as $row) {
-				fwrite($f,$this->generateRow($row));
-			}
-			fwrite($f, $this->generateFooter());
-			fclose($f);
-			// file_put_contents($filename, $this->exportToString());
+	protected function write($data) {
+		switch($this->exportTo) {
+			case 'browser':
+				echo $data;
+				break;
+			case 'string':
+				$this->stringData .= $data;
+				break;
+			case 'file':
+				fwrite($this->tempFile, $data);
+				break;
 		}
 	}
 	
@@ -117,10 +125,7 @@ class ExportDataCSV extends ExportData {
 }
 
 class ExportDataExcel extends ExportData {
-	/**
-	 * Excel code ripped out of Excel_XML (php-excel) by 
-	 *	Oliver Schwarz <oliver.schwarz@gmail.com>
-	 */
+	// Excel XML code based on Excel_XML (http://github.com/oliverschwarz/php-excel) by Oliver Schwarz
 	const XmlHeader = "<?xml version=\"1.0\" encoding=\"%s\"?\>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">";
 	const XmlFooter = "</Workbook>";
 	
@@ -180,7 +185,7 @@ class ExportDataExcel extends ExportData {
 	
 	function sendHttpHeaders() {
 		header("Content-Type: application/vnd.ms-excel; charset=" . $this->encoding);
-		header("Content-Disposition: inline; filename=\"" . $this->filename . "\"");
+		header("Content-Disposition: inline; filename=\"" . basename($this->filename) . "\"");
 	}
 	
 }

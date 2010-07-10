@@ -2,7 +2,7 @@
 
 require "php-export-data.class.php";
 
-$excel = new ExportDataExcel();
+$excel = new ExportDataExcel('browser');
 $excel->filename = "test.xls";
 
 $data = array(
@@ -11,9 +11,8 @@ $data = array(
 	array("1273623874628374634876","=asdf","10-10"),
 );
 
+$excel->initialize();
 foreach($data as $row) {
 	$excel->addRow($row);
 }
-
-//print $excel->exportToString();
-$excel->exportToBrowser();
+$excel->finalize();

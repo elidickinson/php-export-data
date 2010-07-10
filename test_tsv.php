@@ -16,4 +16,5 @@ foreach($data as $row) {
 }
 
 // print $tsv->exportToString();
-$tsv->exportToBrowser();
+// $tsv->exportToBrowser();
+$tsv->writeToFile();

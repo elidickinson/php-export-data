@@ -11,7 +11,7 @@ function genRandomString($length = 100) {
     return $string;
 }
 
-$excel = new ExportDataExcel();
+$excel = new ExportDataExcel(array('useTempFile' => TRUE));
 $excel->filename = "test_big_excel.xls";
 
 

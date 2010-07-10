@@ -4,10 +4,19 @@
 abstract class ExportData {
 	protected $config = array('useTempFile' => FALSE);
 	protected $rows = array();
+	protected $tempFile;
+	protected $tempFilename;
 	public $filename;
 
 	public function __construct($config = array()) {
 		$this->config = array_merge($this->config, $config);
+		
+		if($this->config['useTempFile']) {
+			$this->tempFilename = tempnam(sys_get_temp_dir(), 'exportdata');
+			$this->tempFile = fopen($this->tempFilename, "w");
+			fwrite($this->tempFile, $this->generateHeader());
+		}
+		
 	}
 	
 	public function getConfig() {
@@ -15,7 +24,15 @@ abstract class ExportData {
 	}
 	
 	public function addRow($row) {
-		$this->rows[] = $row;
+		
+		if($this->config['useTempFile']) {
+			// write data to file
+			fwrite($this->tempFile, $this->generateRow($row));
+		}
+		else {
+			// store data in rows array
+			$this->rows[] = $row;
+		}
 	}
 	
 	public function exportToString() {
@@ -29,24 +46,30 @@ abstract class ExportData {
 	}
 	
 	
-	abstract public function sendHeaders();
+	abstract public function sendHttpHeaders();
 	
 	public function exportToBrowser() {
-		$this->sendHeaders();
+		$this->sendHttpHeaders();
 		echo $this->exportToString();
 		exit();
 	}
 	
-	public function exportToFile($filename = NULL) {
-		$filename = $filename ? $filename : $this->filename;
-		$f = fopen($filename,"w");
-		fwrite($f, $this->generateHeader());
-		foreach($this->rows as $row) {
-			fwrite($f,$this->generateRow($row));
+	public function exportToFile() {
+		if($this->config['useTempFile']) {
+			fwrite($this->tempFile, $this->generateFooter());
+			fclose($this->tempFile);
+			rename($this->tempFilename, $this->filename);
 		}
-		fwrite($f, $this->generateFooter());
-		fclose($f);
-		// file_put_contents($filename, $this->exportToString());
+		else {
+			$f = fopen($this->filename,"w");
+			fwrite($f, $this->generateHeader());
+			foreach($this->rows as $row) {
+				fwrite($f,$this->generateRow($row));
+			}
+			fwrite($f, $this->generateFooter());
+			fclose($f);
+			// file_put_contents($filename, $this->exportToString());
+		}
 	}
 	
 	protected function generateHeader() {
@@ -71,9 +94,9 @@ class ExportDataTSV extends ExportData {
 		return implode("\t", $row) . "\n";
 	}
 	
-	function sendHeaders() {
+	function sendHttpHeaders() {
 		header("Content-type: text/tab-separated-values");
-    header("Content-Disposition: attachment; filename=".$this->filename);
+    header("Content-Disposition: attachment; filename=".basename($this->filename));
 	}
 }
 
@@ -87,9 +110,9 @@ class ExportDataCSV extends ExportData {
 		return implode(",", $row) . "\n";
 	}
 	
-	function sendHeaders() {
+	function sendHttpHeaders() {
 		header("Content-type: text/csv");
-		header("Content-Disposition: attachment; filename=".$this->filename);
+		header("Content-Disposition: attachment; filename=".basename($this->filename));
 	}
 }
 
@@ -155,7 +178,7 @@ class ExportDataExcel extends ExportData {
 		return $output;
 	}
 	
-	function sendHeaders() {
+	function sendHttpHeaders() {
 		header("Content-Type: application/vnd.ms-excel; charset=" . $this->encoding);
 		header("Content-Disposition: inline; filename=\"" . $this->filename . "\"");
 	}

@@ -1,7 +1,10 @@
 <?php
 
+/**
+ * ExportData is the base class for exporters to specific file formats. See other
+ * classes below.
+ */
 abstract class ExportData {
-	// protected $config = array('useTempFile' => FALSE);
 	protected $exportTo; // Set in constructor to one of 'browser', 'file', 'string'
 	protected $stringData; // stringData so far, used if export string mode
 	protected $tempFile; // handle to temp file (for export file mode)
@@ -9,9 +12,7 @@ abstract class ExportData {
 
 	public $filename; // file mode: the output file name; browser mode: file name for download; string mode: not used
 
-	public function __construct($exportTo = "browser", $filename = "export") {
-		// $this->config = array_merge($this->config, $config);
-		
+	public function __construct($exportTo = "browser", $filename = "exportdata") {
 		if(!in_array($exportTo, array('browser','file','string') )) {
 			throw new Exception("$exportTo is not a valid ExportData export type");
 		}
@@ -48,12 +49,12 @@ abstract class ExportData {
 		switch($this->exportTo) {
 			case 'browser':
 				flush();
-				exit(); // not sure about this...
 				break;
 			case 'string':
 				// do nothing
 				break;
 			case 'file':
+				// close temp file and move it to correct location
 				fclose($this->tempFile);
 				rename($this->tempFilename, $this->filename);
 				break;
@@ -81,22 +82,27 @@ abstract class ExportData {
 	}
 	
 	protected function generateHeader() {
-		
+		// can be overridden by subclass to return any data that goes at the top of the exported file
 	}
 	
 	protected function generateFooter() {
-		
+		// can be overridden by subclass to return any data that goes at the bottom of the exported file		
 	}
 	
+	// In subclasses generateRow will take $row array and return string of it formatted for export type
 	abstract protected function generateRow($row);
 	
 }
 
+/**
+ * ExportDataTSV - Exports to TSV (tab separated value) format.
+ */
 class ExportDataTSV extends ExportData {
 	
 	function generateRow($row) {
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
+			// Note that we are using \" to escape double quote not ""
 			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
 		}
 		return implode("\t", $row) . "\n";
@@ -108,11 +114,15 @@ class ExportDataTSV extends ExportData {
 	}
 }
 
+/**
+ * ExportDataCSV - Exports to CSV (comma separated value) format.
+ */
 class ExportDataCSV extends ExportData {
 	
 	function generateRow($row) {
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
+			// Note that we are using \" to escape double quote not ""
 			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
 		}
 		return implode(",", $row) . "\n";
@@ -124,23 +134,35 @@ class ExportDataCSV extends ExportData {
 	}
 }
 
+
+/**
+ * ExportDataExcel exports data into an XML format that can be read by MS Excel and
+ * and OpenOffice. Creates a workbook with a single worksheet (title specified by
+ * $title).
+ * 
+ * Note that using .XLS as a file extension will cause Excel 2007 to warn that
+ * the file extension doesn't match the file type, but it will read the file
+ * 
+ * Based on Excel XML code from Excel_XML (http://github.com/oliverschwarz/php-excel)
+ *  by Oliver Schwarz
+ */
 class ExportDataExcel extends ExportData {
-	// Excel XML code based on Excel_XML (http://github.com/oliverschwarz/php-excel) by Oliver Schwarz
+	
 	const XmlHeader = "<?xml version=\"1.0\" encoding=\"%s\"?\>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:html=\"http://www.w3.org/TR/REC-html40\">";
 	const XmlFooter = "</Workbook>";
 	
-	public $encoding = 'UTF-8';
-	public $title = '';
+	public $encoding = 'UTF-8'; // encoding type to specify in file. 
+	// Note that you're on your own for making sure your data is actually encoded to this encoding
 	
-	function generateHeader() {		
-		
-		$title = $this->title ? $this->title : "Untitled";
+	public $title = 'Untitled'; // title for Worksheet 
+	
+	function generateHeader() {
 		
 		// workbook header
 		$output = stripslashes(sprintf(self::XmlHeader, $this->encoding)) . "\n";
 		
 		// worksheet header
-		$output .= sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($title));
+		$output .= sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($this->title));
 		
 		return $output;
 	}

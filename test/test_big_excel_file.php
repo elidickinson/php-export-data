@@ -1,5 +1,9 @@
 <?php
 
+// Example of exporting a large amount of data to a file. On my 
+// computer it takes 43 seconds to write out 83MB of data, but 
+// only uses 750kb of memory.
+
 require "php-export-data.class.php";
 
 function genRandomString($length = 100) {
@@ -22,4 +26,4 @@ for($i = 1; $i<100000; $i++) {
 $excel->finalize();
 
 
-print number_format(memory_get_peak_usage());
+print "memory used: " . number_format(memory_get_peak_usage());

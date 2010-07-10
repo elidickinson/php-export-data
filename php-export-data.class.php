@@ -6,6 +6,13 @@ abstract class ExportData {
 	protected $rows = array();
 	public $filename;
 
+	public function __construct($config = array()) {
+		$this->config = array_merge($this->config, $config);
+	}
+	
+	public function getConfig() {
+		return $this->config;
+	}
 	
 	public function addRow($row) {
 		$this->rows[] = $row;
@@ -30,8 +37,16 @@ abstract class ExportData {
 		exit();
 	}
 	
-	public function writeToFile() {
-		// TODO
+	public function exportToFile($filename = NULL) {
+		$filename = $filename ? $filename : $this->filename;
+		$f = fopen($filename,"w");
+		fwrite($f, $this->generateHeader());
+		foreach($this->rows as $row) {
+			fwrite($f,$this->generateRow($row));
+		}
+		fwrite($f, $this->generateFooter());
+		fclose($f);
+		// file_put_contents($filename, $this->exportToString());
 	}
 	
 	protected function generateHeader() {
@@ -50,10 +65,10 @@ class ExportDataTSV extends ExportData {
 	
 	function generateRow($row) {
 		foreach ($row as $key => $value) {
-      // Escape inner quotes and wrap all contents in new quotes.
-      $row[$key] = '"'. str_replace('"', '\"', $value) .'"';
-    }
-    return implode("\t", $row) . "\n";
+			// Escape inner quotes and wrap all contents in new quotes.
+			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+		}
+		return implode("\t", $row) . "\n";
 	}
 	
 	function sendHeaders() {
@@ -66,15 +81,15 @@ class ExportDataCSV extends ExportData {
 	
 	function generateRow($row) {
 		foreach ($row as $key => $value) {
-      // Escape inner quotes and wrap all contents in new quotes.
-      $row[$key] = '"'. str_replace('"', '\"', $value) .'"';
-    }
-    return implode(",", $row) . "\n";
+			// Escape inner quotes and wrap all contents in new quotes.
+			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+		}
+		return implode(",", $row) . "\n";
 	}
 	
 	function sendHeaders() {
 		header("Content-type: text/csv");
-    header("Content-Disposition: attachment; filename=".$this->filename);
+		header("Content-Disposition: attachment; filename=".$this->filename);
 	}
 }
 

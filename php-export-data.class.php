@@ -1,4 +1,5 @@
 <?php
+// php-export-data by Eli Dickinson, http://github.com/elidickinson/php-export-data
 
 /**
  * ExportData is the base class for exporters to specific file formats. See other

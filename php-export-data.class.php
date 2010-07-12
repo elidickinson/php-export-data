@@ -196,13 +196,13 @@ class ExportDataExcel extends ExportData {
 	private function generateCell($item) {
 		$output = '';
 		
-		$type = 'String';
-		if (is_numeric($item)) {
+		if(preg_match("/^[0-9]+$/",$item)) {
 			$type = 'Number';
-			if ($item{0} == '0' && strlen($item) > 1 && $item{1} != '.') {
-				$type = 'String';
-			}
 		}
+		else {
+			$type = 'String';
+		}
+				
 		$item = str_replace('&#039;', '&apos;', htmlspecialchars($item, ENT_QUOTES));
 		$output .= sprintf("            <Cell><Data ss:Type=\"%s\">%s</Data></Cell>\n", $type, $item);
 		

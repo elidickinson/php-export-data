@@ -165,6 +165,11 @@ class ExportDataExcel extends ExportData {
 		// workbook header
 		$output = stripslashes(sprintf(self::XmlHeader, $this->encoding)) . "\n";
 		
+		// Set up styles
+		$output .= "<Styles>\n";
+		$output .= "<Style ss:ID=\"sDT\"><NumberFormat ss:Format=\"Short Date\"/></Style>\n";
+		$output .= "</Styles>\n";
+		
 		// worksheet header
 		$output .= sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($this->title));
 		
@@ -195,16 +200,26 @@ class ExportDataExcel extends ExportData {
 	
 	private function generateCell($item) {
 		$output = '';
+		$style = '';
 		
-		if(preg_match("/^[0-9]+$/",$item)) {
+		if(preg_match("/^[0-9]{1,11}$/",$item)) {
 			$type = 'Number';
+		}
+		// sniff for valid dates should start with something like 2010-07-14 or 7/14/2010 etc..
+		elseif(preg_match("/^\d{1,4}[\\\-]\d{1,2}[\\\-]\d{1,4}/",$item) && $timestamp = strtotime($item)) {
+			$type = 'DateTime';
+			$item = strftime("%Y-%m-%dT%H:%M:%S",$timestamp);
+			$style = 'sDT'; // defined in header; tells excel to format date for display
 		}
 		else {
 			$type = 'String';
 		}
 				
 		$item = str_replace('&#039;', '&apos;', htmlspecialchars($item, ENT_QUOTES));
-		$output .= sprintf("            <Cell><Data ss:Type=\"%s\">%s</Data></Cell>\n", $type, $item);
+		$output .= "            ";
+		$output .= $style ? "<Cell ss:StyleID=\"$style\">" : "<Cell>";
+		$output .= sprintf("<Data ss:Type=\"%s\">%s</Data>", $type, $item);
+		$output .= "</Cell>\n";
 		
 		return $output;
 	}

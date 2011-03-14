@@ -17,16 +17,17 @@ Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliver
     require 'php-export-data.class.php';
 
     // 'browser' tells the library to stream the data directly to the browser.
+    // other options are 'file' or 'string'
     // 'test.xls' is the filename that the browser will use when attempting to 
     // save the download
-    $exporter = new ExportDataExcel('browser', 'test.xls')
+    $exporter = new ExportDataExcel('browser', 'test.xls');
 
     $exporter->initialize(); // starts streaming data to web browser
 
     // pass addRow() an array and it converts it to Excel XML format and sends 
     // it to the browser
     $exporter->addRow(array("This", "is", "a", "test")); 
-    $exporter->addRow(array(1, 2, 3, 4));
+    $exporter->addRow(array(1, 2, 3, "123-456-7890"));
 
     // doesn't care how many columns you give it
     $exporter->addRow(array("foo")); 

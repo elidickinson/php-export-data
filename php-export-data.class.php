@@ -206,7 +206,10 @@ class ExportDataExcel extends ExportData {
 			$type = 'Number';
 		}
 		// sniff for valid dates should start with something like 2010-07-14 or 7/14/2010 etc..
-		elseif(preg_match("/^\d{1,4}[\\\-]\d{1,2}[\\\-]\d{1,4}/",$item) && $timestamp = strtotime($item)) {
+		elseif(preg_match("/^(\d{2}|\d{4})[\\\-]\d{1,2}[\\\-](\d{2}|\d{4})([^d].+)?$/",$item) &&
+					($timestamp = strtotime($item)) &&
+					($timestamp > 0) &&
+					($timestamp < strtotime('+500 years'))) {
 			$type = 'DateTime';
 			$item = strftime("%Y-%m-%dT%H:%M:%S",$timestamp);
 			$style = 'sDT'; // defined in header; tells excel to format date for display

@@ -2,6 +2,8 @@ php-export-data by Eli Dickinson
 
 http://github.com/elidickinson/php-export-data
 
+Released under the permissive MIT License: http://www.opensource.org/licenses/mit-license.php
+
 A simple library for exporting tabular data to Excel-friendly XML, CSV, or TSV. It supports streaming exported data to a file or directly to the browser as a download so it is suitable for exporting large datasets (you won't run out of memory).
 
 Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliverschwarz/php-excel)

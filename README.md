@@ -41,4 +41,7 @@ Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliver
     ?>
 
 
-See the test/ directory for more examples
+See the test/ directory for more examples.
+
+
+Some other options for creating Excel files from PHP are listed here: http://stackoverflow.com/questions/3930975/alternative-for-php-excel/3931142#3931142

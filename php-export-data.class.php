@@ -205,11 +205,13 @@ class ExportDataExcel extends ExportData {
 		if(preg_match("/^[0-9]{1,11}$/",$item)) {
 			$type = 'Number';
 		}
-		// Sniff for valid dates; should look something like 2010-07-14 or 7/14/2010 etc..
+		// Sniff for valid dates; should look something like 2010-07-14 or 7/14/2010 etc. Can
+		// also have an optional time after the date.
+		//
 		// Note we want to be very strict in what we consider a date. There is the possibility
 		// of really screwing up the data if we try to reformat a string that was not actually 
 		// intended to represent a date.
-		elseif(preg_match("/^(\d{1,2}|\d{4})[\/\-]\d{1,2}[\/\-](\d{1,2}|\d{4})$/",$item) &&
+		elseif(preg_match("/^(\d{1,2}|\d{4})[\/\-]\d{1,2}[\/\-](\d{1,2}|\d{4})([^\d].+)?$/",$item) &&
 					($timestamp = strtotime($item)) &&
 					($timestamp > 0) &&
 					($timestamp < strtotime('+500 years'))) {

@@ -202,7 +202,9 @@ class ExportDataExcel extends ExportData {
 		$output = '';
 		$style = '';
 		
-		if(preg_match("/^[0-9]{1,11}$/",$item)) {
+		// Tell Excel to treat as a number. Note that Excel only stores roughly 15 digits, so keep 
+		// as text if number is longer than that.
+		if(preg_match("/^-?\d+(?:[.,]\d+)?$/",$item) && (strlen($item) < 15)) {
 			$type = 'Number';
 		}
 		// Sniff for valid dates; should look something like 2010-07-14 or 7/14/2010 etc. Can

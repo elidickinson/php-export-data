@@ -171,16 +171,35 @@ class ExportDataExcel extends ExportData {
 		$output .= "</Styles>\n";
 		
 		// worksheet header
-		$output .= sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($this->title));
+                $output .= $this->generateWorksheetHeader($this->title);
 		
 		return $output;
-	}
+        }
+
+        // 2014-01-02 added by GDX
+        function generateWorksheetHeader($title)
+        {
+            return sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($title));
+        }
+
+        function generateWorksheetFooter()
+        {
+            return "    </Table>\n</Worksheet>\n";
+        }
+
+        public function addWorksheet($title)
+        {
+            $output = '';
+            $output .= $this->generateWorksheetFooter();
+            $output .= $this->generateWorksheetHeader($title);
+            $this->write($output);
+        }
 	
 	function generateFooter() {
 		$output = '';
 		
 		// worksheet footer
-		$output .= "    </Table>\n</Worksheet>\n";
+		$output .= $this->generateWorksheetFooter();
 		
 		// workbook footer
 		$output .= self::XmlFooter;

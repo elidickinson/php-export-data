@@ -10,15 +10,17 @@ abstract class ExportData {
 	protected $stringData; // stringData so far, used if export string mode
 	protected $tempFile; // handle to temp file (for export file mode)
 	protected $tempFilename; // temp file name and path (for export file mode)
+    protected $thousandsSeparator; // handle thousands separator in excel export
 
 	public $filename; // file mode: the output file name; browser mode: file name for download; string mode: not used
 
-	public function __construct($exportTo = "browser", $filename = "exportdata") {
+	public function __construct($exportTo = "browser", $filename = "exportdata", $thousandsSeparator = false) {
 		if(!in_array($exportTo, array('browser','file','string') )) {
 			throw new Exception("$exportTo is not a valid ExportData export type");
 		}
 		$this->exportTo = $exportTo;
 		$this->filename = $filename;
+        $this->thousandsSeparator = $thousandsSeparator;
 	}
 	
 	public function initialize() {
@@ -168,6 +170,7 @@ class ExportDataExcel extends ExportData {
 		// Set up styles
 		$output .= "<Styles>\n";
 		$output .= "<Style ss:ID=\"sDT\"><NumberFormat ss:Format=\"Short Date\"/></Style>\n";
+        $output .= "<Style ss:ID=\"s63\"><NumberFormat ss:Format=\"Standard\"/></Style>\n";
 		$output .= "</Styles>\n";
 		
 		// worksheet header
@@ -206,6 +209,7 @@ class ExportDataExcel extends ExportData {
 		// as text if number is longer than that.
 		if(preg_match("/^-?\d+(?:[.,]\d+)?$/",$item) && (strlen($item) < 15)) {
 			$type = 'Number';
+            $style = $this->thousandsSeparator ? 's63' : null; // defined in header; tells excel to format number with thousands separator
 		}
 		// Sniff for valid dates; should look something like 2010-07-14 or 7/14/2010 etc. Can
 		// also have an optional time after the date.

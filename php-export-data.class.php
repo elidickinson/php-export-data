@@ -213,13 +213,13 @@ class ExportDataExcel extends ExportData {
 		// Note we want to be very strict in what we consider a date. There is the possibility
 		// of really screwing up the data if we try to reformat a string that was not actually 
 		// intended to represent a date.
-		elseif(preg_match("/^(\d{1,2}|\d{4})[\/\-]\d{1,2}[\/\-](\d{1,2}|\d{4})([^\d].+)?$/",$item) &&
+		elseif(preg_match("/^(\d{1,2}|\d{4})[\/\-]\d{1,2}[\/\-](\d{4}|\d{1,2})([^\d].+)?$/",$item) &&
 					($timestamp = strtotime($item)) &&
 					($timestamp > 0) &&
 					($timestamp < strtotime('+500 years'))) {
 			$type = 'DateTime';
 			
-			$item = strftime("%Y-%m-%dT%H:%M:%S",$timestamp);
+			//$item = strftime("%Y-%m-%dT%H:%M:%S",$timestamp);
 			$style = 'sDT'; // defined in header; tells excel to format date for display
 		}
 		else {

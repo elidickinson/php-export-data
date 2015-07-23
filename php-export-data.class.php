@@ -120,7 +120,7 @@ class ExportDataTSV extends ExportData {
  */
 class ExportDataCSV extends ExportData {
 	
-	function generateRow($row, $separator = ";") {
+	function generateRow($row, $separator = ",") {
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
 			// Note that we are using \" to escape double quote not ""

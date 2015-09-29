@@ -1,0 +1,11 @@
+nbproject/private/
+tmp/
+vendor/
+composer.lock
+/composer.lock
+/composer.phar
+/.idea
+build/coverage
+build/logs
+cache.properties
+/bin

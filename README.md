@@ -8,15 +8,20 @@ A simple library for exporting tabular data to Excel-friendly XML, CSV, or TSV. 
 
 Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliverschwarz/php-excel)
 
+## Composer Install
+
+```shell
+    composer require diego3/php-export-data
+```
 
 ## How to use it
-
+    ```php
     <?php
 
     // When executed in a browser, this script will prompt for download 
     // of 'test.xls' which can then be opened by Excel or OpenOffice.
 
-    require 'php-export-data.class.php';
+    use Export\ExportDataExcel;
 
     // 'browser' tells the library to stream the data directly to the browser.
     // other options are 'file' or 'string'
@@ -38,8 +43,8 @@ Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliver
 
     exit(); // all done
 
-    ?>
-
+    ```
+    
 
 See the test/ directory for more examples.
 

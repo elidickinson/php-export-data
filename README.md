@@ -11,13 +11,12 @@ Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliver
 ## Composer Install
 
 ```shell
-    composer require diego3/php-export-data
+composer require diego3/php-export-data
 ```
 
 ## How to use it
     ```php
-    <?php
-
+    
     // When executed in a browser, this script will prompt for download 
     // of 'test.xls' which can then be opened by Excel or OpenOffice.
 
@@ -42,7 +41,6 @@ Excel XML code is based on Excel_XML by Oliver Schwarz (http://github.com/oliver
     $exporter->finalize(); // writes the footer, flushes remaining data to browser.
 
     exit(); // all done
-
     ```
     
 

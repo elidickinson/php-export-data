@@ -1,0 +1,34 @@
+{
+    "name": "diego3/php-export-data",
+    "type": "library",
+    "description": "A simple library for exporting tabular data to Excel-friendly XML, CSV, or TSV",
+    "keywords": ["library", "excel", "csv"],
+    "homepage": "http://github.com/diego3/php-export-data",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Diego Rosa dos Santos",
+            "email": "www.diegosantos.com.br@gmail.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Eli Dickinson",
+            "email": "eli@elidickinson.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+       "phpunit/phpunit" : "4.5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Export\\": "src/"
+        },
+        "psr-4": {
+            "ExportTest\\": "test/src/"
+        }
+    }
+}

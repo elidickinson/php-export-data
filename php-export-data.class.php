@@ -39,6 +39,11 @@ abstract class ExportData {
 		$this->write($this->generateHeader());
 	}
 	
+	//added by Nicola Boccardi
+	public function addSheet($title){
+		$this->write($this->generateSheet($title));
+	}
+	
 	public function addRow($row) {
 		$this->write($this->generateRow($row));
 	}
@@ -88,6 +93,11 @@ abstract class ExportData {
 	
 	protected function generateFooter() {
 		// can be overridden by subclass to return any data that goes at the bottom of the exported file		
+	}
+	
+	//added by Nicola Boccardi
+	protected function generateSheet($title){
+		// can be overridden by subclass to return a new sheet
 	}
 	
 	// In subclasses generateRow will take $row array and return string of it formatted for export type
@@ -188,6 +198,19 @@ class ExportDataExcel extends ExportData {
 		return $output;
 	}
 	
+	//added by Nicola Boccardi
+	function generateSheet($title){
+		$output = '';
+		$this->title = $title;
+
+		// close previous worksheet
+		$output .= "    </Table>\n</Worksheet>\n";
+		// open new worksheet with title
+		$output .= sprintf("<Worksheet ss:Name=\"%s\">\n    <Table>\n", htmlentities($this->title));
+
+		return $output;
+	}
+	
 	function generateRow($row) {
 		$output = '';
 		$output .= "        <Row>\n";
@@ -201,6 +224,7 @@ class ExportDataExcel extends ExportData {
 	private function generateCell($item) {
 		$output = '';
 		$style = '';
+		$formula = '';//added
 		
 		// Tell Excel to treat as a number. Note that Excel only stores roughly 15 digits, so keep 
 		// as text if number is longer than that.
@@ -221,13 +245,19 @@ class ExportDataExcel extends ExportData {
 			$item = strftime("%Y-%m-%dT%H:%M:%S",$timestamp);
 			$style = 'sDT'; // defined in header; tells excel to format date for display
 		}
+		//added by Nicola Boccardi
+		elseif(strpos($item, "=") === 0){
+		    $type = 'Number';
+		    $formula = sprintf("ss:Formula=\"%s\"", $item);
+		    $item = '';
+		}
 		else {
 			$type = 'String';
 		}
 				
 		$item = str_replace('&#039;', '&apos;', htmlspecialchars($item, ENT_QUOTES));
 		$output .= "            ";
-		$output .= $style ? "<Cell ss:StyleID=\"$style\">" : "<Cell>";
+		$output .= $style ? "<Cell ss:StyleID=\"$style\" $formula>" : "<Cell $formula>";//modified
 		$output .= sprintf("<Data ss:Type=\"%s\">%s</Data>", $type, $item);
 		$output .= "</Cell>\n";
 		

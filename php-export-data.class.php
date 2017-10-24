@@ -1,6 +1,26 @@
 <?php
 // php-export-data by Eli Dickinson, http://github.com/elidickinson/php-export-data
-
+if (!function_exists('mb_str_replace')) {
+    function mb_str_replace($search, $replace, $subject, &$count = 0) {
+        if (!is_array($subject)) {
+            // Normalize $search and $replace so they are both arrays of the same length
+            $searches = is_array($search) ? array_values($search) : array($search);
+            $replacements = is_array($replace) ? array_values($replace) : array($replace);
+            $replacements = array_pad($replacements, count($searches), '');
+            foreach ($searches as $key => $search) {
+                $parts = mb_split(preg_quote($search), $subject);
+                $count += count($parts) - 1;
+                $subject = implode($replacements[$key], $parts);
+            }
+        } else {
+            // Call mb_str_replace for each subject in array, recursively
+            foreach ($subject as $key => $value) {
+                $subject[$key] = mb_str_replace($search, $replace, $value, $count);
+            }
+        }
+        return $subject;
+    }
+}
 /**
  * ExportData is the base class for exporters to specific file formats. See other
  * classes below.
@@ -42,6 +62,14 @@ abstract class ExportData {
 	public function addRow($row) {
 		$this->write($this->generateRow($row));
 	}
+	
+	public function addRowToArray($allRows = array()) {
+        if(is_array($allRows) && count($allRows)>=1){
+            foreach ($allRows as $row){
+                $this->write($this->generateRow($row));
+            }
+        }
+    }
 	
 	public function finalize() {
 		
@@ -104,7 +132,8 @@ class ExportDataTSV extends ExportData {
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
 			// Note that we are using \" to escape double quote not ""
-			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+			//$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+            $row[$key] = '"'. mb_str_replace('"', '\"', $value) .'"';
 		}
 		return implode("\t", $row) . "\n";
 	}
@@ -124,7 +153,8 @@ class ExportDataCSV extends ExportData {
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
 			// Note that we are using \" to escape double quote not ""
-			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+			//$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
+            $row[$key] = '"'. mb_str_replace('"', '\"', $value) .'"';
 		}
 		return implode(",", $row) . "\n";
 	}

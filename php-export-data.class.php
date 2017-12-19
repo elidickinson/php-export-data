@@ -25,6 +25,9 @@ abstract class ExportData {
 		
 		switch($this->exportTo) {
 			case 'browser':
+				while (ob_get_level()) {
+					ob_end_clean();
+				}
 				$this->sendHttpHeaders();
 				break;
 			case 'string':

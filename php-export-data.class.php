@@ -101,20 +101,15 @@ abstract class ExportData {
 /**
  * ExportDataTSV - Exports to TSV (tab separated value) format.
  */
-class ExportDataTSV extends ExportData {
-	
-	function generateRow($row) {
-		foreach ($row as $key => $value) {
-			// Escape inner quotes and wrap all contents in new quotes.
-			// Note that we are using \" to escape double quote not ""
-			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
-		}
-		return implode("\t", $row) . "\n";
+class ExportDataTSV extends ExportDataCSV {
+
+	function generateRow($row, $separator = "\t") {
+		return parent::generateRow($row, $separator);
 	}
 	
 	function sendHttpHeaders() {
 		header("Content-type: text/tab-separated-values");
-    header("Content-Disposition: attachment; filename=".basename($this->filename));
+		header("Content-Disposition: attachment; filename=".basename($this->filename));
 	}
 }
 
@@ -122,19 +117,46 @@ class ExportDataTSV extends ExportData {
  * ExportDataCSV - Exports to CSV (comma separated value) format.
  */
 class ExportDataCSV extends ExportData {
-	
+	/**
+	 * @var bool MS Excel badly work with CSV - even read.
+	 * But if you edit, save and close file in MS Excel, then MS Excel cannot open file again.
+	 */
+	public $msExcelSaveHack = false;
+
 	function generateRow($row, $separator = ",") {
+		$res = '';
+
+		if ( $this->msExcelSaveHack ) {
+			//hack is to add $separator in first cell of first row
+			$this->msExcelSaveHack = false;
+			$res .= $this->generateRow([$separator]);
+		}
+
 		foreach ($row as $key => $value) {
 			// Escape inner quotes and wrap all contents in new quotes.
 			// Note that we are using \" to escape double quote not ""
 			$row[$key] = '"'. str_replace('"', '\"', $value) .'"';
 		}
-		return implode($separator, $row) . "\n";
+		$res .= implode($separator, $row) . "\n";
+
+		return $res;
 	}
 	
 	function sendHttpHeaders() {
 		header("Content-type: text/csv");
 		header("Content-Disposition: attachment; filename=".basename($this->filename));
+	}
+}
+
+/**
+ * ExportDataSCSV - Exports to CSV (semicolon separated value) format.
+ * Useful if you want to open CSV file on Windows MS Excel without additional actions.
+ */
+class ExportDataSCSV extends ExportDataCSV {
+	public $msExcelSaveHack = true;
+
+	function generateRow($row, $separator = ';') {
+		return parent::generateRow($row, $separator);
 	}
 }
 
